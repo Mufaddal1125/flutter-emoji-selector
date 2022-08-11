@@ -1,3 +1,7 @@
-## 0.0.1
+## \[0.0.1\]
+### Added
+- Create EmojiSelector Widget
 
-* TODO: Describe initial release.
+## 0.1.0 - 2022-08-11
+### Added
+- Search emojis
