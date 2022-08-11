@@ -18,6 +18,10 @@ class _EmojiSelectorState extends State<EmojiSelector>
   final List<Emoji> _emojis = Emoji.all();
   late TabController tabController;
 
+  final _searchController = TextEditingController();
+
+  List<Emoji> searchResults = [];
+
   @override
   void initState() {
     initParser();
@@ -39,51 +43,89 @@ class _EmojiSelectorState extends State<EmojiSelector>
 
   @override
   Widget build(BuildContext context) {
-    var pages = [
-      for (var group in _emojiGroupMap.keys)
-        EmojiGroupGrid(
-          emojis: _emojiGroupMap[group]!,
-          onEmojiSelected: widget.onEmojiSelected,
-        ),
-    ];
     return Column(
       children: [
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: TabBar(
-            isScrollable: true,
-            controller: tabController,
-            onTap: (value) {
-              tabController.animateTo(value);
+          child: TextFormField(
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none,
+              ),
+              floatingLabelBehavior: FloatingLabelBehavior.never,
+              labelText: 'Search Emoji',
+              hintText: 'Search Emoji',
+              fillColor: Theme.of(context).primaryColor.withOpacity(0.1),
+              filled: true,
+            ),
+            controller: _searchController,
+            onChanged: (val) {
+              setState(() {
+                searchResults = _emojis.where((element) {
+                  var val2 = val.toLowerCase();
+                  return element.char.contains(val) ||
+                      element.name.toLowerCase().contains(val2) ||
+                      element.shortName.toLowerCase().contains(val2) ||
+                      element.emojiGroup.name.toLowerCase().contains(val2);
+                }).toList();
+              });
             },
-            tabs: [
-              for (var group in _emojiGroupMap.keys)
-                Tab(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Theme(
-                        data: Theme.of(context)
-                            .copyWith(primaryColor: Colors.black),
-                        child: group.icon,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        group.value,
-                        style: Theme.of(context).textTheme.labelLarge,
-                      ),
-                    ],
+          ),
+        ),
+        if (_searchController.text.isNotEmpty)
+          Expanded(
+            child: EmojiGroupGrid(
+              emojis: searchResults,
+              onEmojiSelected: widget.onEmojiSelected,
+            ),
+          )
+        else ...[
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TabBar(
+              isScrollable: true,
+              controller: tabController,
+              onTap: (value) {
+                tabController.animateTo(value);
+              },
+              tabs: [
+                for (var group in _emojiGroupMap.keys)
+                  Tab(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Theme(
+                          data: Theme.of(context)
+                              .copyWith(primaryColor: Colors.black),
+                          child: group.icon,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          group.value,
+                          style: Theme.of(context).textTheme.labelLarge,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
-        ),
-        Expanded(
-          child: TabBarView(
-            controller: tabController,
-            children: pages,
+          Expanded(
+            child: Builder(builder: (context) {
+              return TabBarView(
+                controller: tabController,
+                children: [
+                  for (var group in _emojiGroupMap.keys)
+                    EmojiGroupGrid(
+                      emojis: _emojiGroupMap[group]!,
+                      onEmojiSelected: widget.onEmojiSelected,
+                    ),
+                ],
+              );
+            }),
           ),
-        ),
+        ]
       ],
     );
   }
@@ -104,14 +146,38 @@ class EmojiGroupGrid extends StatelessWidget {
       maxCrossAxisExtent: 50,
       children: [
         for (var item in _emojis)
-          TextButton(
-            child: Text(
-              item.char,
-              style: const TextStyle(fontSize: 32),
-            ),
-            onPressed: () => onEmojiSelected?.call(item),
+          EmojiWidget(
+            item: item,
+            onEmojiSelected: onEmojiSelected,
           ),
       ],
+    );
+  }
+}
+
+class EmojiWidget extends StatelessWidget {
+  const EmojiWidget({
+    Key? key,
+    required this.item,
+    required this.onEmojiSelected,
+  }) : super(key: key);
+
+  final Emoji item;
+  final Function(Emoji emoji)? onEmojiSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: InkWell(
+        child: Tooltip(
+          message: item.shortName.replaceAll('_', ' '),
+          child: Text(
+            item.char,
+            style: const TextStyle(fontSize: 30),
+          ),
+        ),
+        onTap: () => onEmojiSelected?.call(item),
+      ),
     );
   }
 }
