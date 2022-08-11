@@ -31,14 +31,38 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+
   @override
   Widget build(BuildContext context) {
-    return Material(
-      child: EmojiSelector(
-        onEmojiSelected: (emoji) {
-          print(emoji.char); // prints the emoji
-          print(emoji.name); // prints the emoji name
-        },
+    return Scaffold(
+      appBar: AppBar(title: const Text('Emoji Selector')),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Center(
+            child: TextButton(
+              child: const Text('Open Emoji Selector 😀'),
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  builder: (context) {
+                    return BottomSheet(
+                      onClosing: () {},
+                      builder: ((context) {
+                        return EmojiSelector(
+                          onEmojiSelected: (emoji) {
+                            print(emoji.char); // prints the emoji
+                            print(emoji.name); // prints the emoji name
+                          },
+                        );
+                      }),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

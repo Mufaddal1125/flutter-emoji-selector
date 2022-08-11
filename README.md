@@ -15,7 +15,15 @@ Emoji selector for Flutter
 
 ## Features
 
-Emoji Picker for flutter Available for all platforms
+- Available on all platforms
+- Categorized Emojis
+- Search Emojis
+
+<p align="center"><img src="assets/emoji_selector.png" height="700"></p>
+
+
+## Search
+<p align="center"><img src="assets/search.png" height="700"></p>
 
 ## Getting started
 

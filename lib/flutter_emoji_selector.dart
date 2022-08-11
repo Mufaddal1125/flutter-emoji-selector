@@ -48,6 +48,7 @@ class _EmojiSelectorState extends State<EmojiSelector>
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: TextFormField(
+            autofocus: true,
             decoration: InputDecoration(
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
