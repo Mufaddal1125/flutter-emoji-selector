@@ -2,7 +2,7 @@ library flutter_emoji_selector;
 
 import 'package:flutter/material.dart';
 import 'package:emojis/emoji.dart';
-
+import 'package:flutter_portal/flutter_portal.dart';
 export 'package:emojis/emoji.dart'; // to use Emoji utilities
 
 class EmojiSelector extends StatefulWidget {
@@ -43,96 +43,98 @@ class _EmojiSelectorState extends State<EmojiSelector>
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: TextFormField(
-            autofocus: true,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide.none,
-              ),
-              floatingLabelBehavior: FloatingLabelBehavior.never,
-              labelText: 'Search Emoji',
-              hintText: 'Search Emoji',
-              fillColor: Theme.of(context).primaryColor.withOpacity(0.1),
-              filled: true,
-            ),
-            controller: _searchController,
-            onChanged: (val) {
-              setState(() {
-                searchResults = _emojis.where((element) {
-                  var val2 = val.toLowerCase();
-                  return element.char.contains(val) ||
-                      element.name.toLowerCase().contains(val2) ||
-                      element.shortName.toLowerCase().contains(val2) ||
-                      element.emojiGroup.name.toLowerCase().contains(val2);
-                }).toList();
-              });
-            },
-          ),
-        ),
-        if (_searchController.text.isNotEmpty)
-          Expanded(
-            child: EmojiGroupGrid(
-              emojis: searchResults,
-              onEmojiSelected: widget.onEmojiSelected,
-            ),
-          )
-        else ...[
+    return Portal(
+      child: Column(
+        children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: TabBar(
-              isScrollable: true,
-              controller: tabController,
-              onTap: (value) {
-                tabController.animateTo(value);
+            child: TextFormField(
+              autofocus: true,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none,
+                ),
+                floatingLabelBehavior: FloatingLabelBehavior.never,
+                labelText: 'Search Emoji',
+                hintText: 'Search Emoji',
+                fillColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                filled: true,
+              ),
+              controller: _searchController,
+              onChanged: (val) {
+                setState(() {
+                  searchResults = _emojis.where((element) {
+                    var val2 = val.toLowerCase();
+                    return element.char.contains(val) ||
+                        element.name.toLowerCase().contains(val2) ||
+                        element.shortName.toLowerCase().contains(val2) ||
+                        element.emojiGroup.name.toLowerCase().contains(val2);
+                  }).toList();
+                });
               },
-              tabs: [
-                for (var group in _emojiGroupMap.keys)
-                  Tab(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Theme(
-                          data: Theme.of(context)
-                              .copyWith(primaryColor: Colors.black),
-                          child: group.icon,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          group.value,
-                          style: Theme.of(context).textTheme.labelLarge,
-                        ),
-                      ],
-                    ),
-                  ),
-              ],
             ),
           ),
-          Expanded(
-            child: Builder(builder: (context) {
-              return TabBarView(
+          if (_searchController.text.isNotEmpty)
+            Expanded(
+              child: EmojiGroupGrid(
+                emojis: searchResults,
+                onEmojiSelected: widget.onEmojiSelected,
+              ),
+            )
+          else ...[
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TabBar(
+                isScrollable: true,
                 controller: tabController,
-                children: [
+                onTap: (value) {
+                  tabController.animateTo(value);
+                },
+                tabs: [
                   for (var group in _emojiGroupMap.keys)
-                    EmojiGroupGrid(
-                      emojis: _emojiGroupMap[group]!,
-                      onEmojiSelected: widget.onEmojiSelected,
+                    Tab(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Theme(
+                            data: Theme.of(context)
+                                .copyWith(primaryColor: Colors.black),
+                            child: group.icon,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            group.value,
+                            style: Theme.of(context).textTheme.labelLarge,
+                          ),
+                        ],
+                      ),
                     ),
                 ],
-              );
-            }),
-          ),
-        ]
-      ],
+              ),
+            ),
+            Expanded(
+              child: Builder(builder: (context) {
+                return TabBarView(
+                  controller: tabController,
+                  children: [
+                    for (var group in _emojiGroupMap.keys)
+                      EmojiGroupGrid(
+                        emojis: _emojiGroupMap[group]!,
+                        onEmojiSelected: widget.onEmojiSelected,
+                      ),
+                  ],
+                );
+              }),
+            ),
+          ]
+        ],
+      ),
     );
   }
 }
 
-class EmojiGroupGrid extends StatelessWidget {
+class EmojiGroupGrid extends StatefulWidget {
   const EmojiGroupGrid({
     super.key,
     required List<Emoji> emojis,
@@ -142,6 +144,51 @@ class EmojiGroupGrid extends StatelessWidget {
   final List<Emoji> _emojis;
 
   @override
+  State<EmojiGroupGrid> createState() => _EmojiGroupGridState();
+}
+
+class _EmojiGroupGridState extends State<EmojiGroupGrid> {
+  final List<Emoji> _emojis = [];
+  final Map<Emoji, List<Emoji>> _modifiableEmojiMap = {};
+  final Map<String, List<Emoji>> l = {};
+
+  @override
+  void initState() {
+    populateEmojis();
+    super.initState();
+  }
+
+  void populateEmojis() {
+    for (var emoji in widget._emojis) {
+      if (emoji.modifiable) {
+        var stabilize = Emoji.stabilize(emoji.char, gender: false);
+        var noSkin = Emoji.byChar(stabilize);
+        if (noSkin != null) {
+          _modifiableEmojiMap[noSkin] ??= [];
+          _modifiableEmojiMap[noSkin]!.add(emoji);
+        } else {
+          var split = emoji.name.split(':');
+          var emojiName = split.first;
+          l[emojiName] ??= [];
+          l[emojiName]!.add(emoji);
+        }
+        continue;
+      }
+      _emojis.add(emoji);
+    }
+    for (var emoji in widget._emojis) {
+      if (Emoji.modify(emoji.char, fitzpatrick.light) != emoji.char) {
+        var split = emoji.name.split(':');
+        var emojiName = split.first;
+        if (l.containsKey(emojiName)) {
+          _modifiableEmojiMap[emoji] = l[emojiName]!;
+        }
+      }
+    }
+    _emojis.addAll(_modifiableEmojiMap.keys);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return GridView.extent(
       maxCrossAxisExtent: 50,
@@ -149,35 +196,88 @@ class EmojiGroupGrid extends StatelessWidget {
         for (var item in _emojis)
           EmojiWidget(
             item: item,
-            onEmojiSelected: onEmojiSelected,
+            onEmojiSelected: widget.onEmojiSelected,
+            modifiablEmojis: _modifiableEmojiMap[item],
           ),
       ],
     );
   }
 }
 
-class EmojiWidget extends StatelessWidget {
+class EmojiWidget extends StatefulWidget {
   const EmojiWidget({
     Key? key,
     required this.item,
     required this.onEmojiSelected,
+    this.modifiablEmojis,
   }) : super(key: key);
 
+  final List<Emoji>? modifiablEmojis;
   final Emoji item;
   final Function(Emoji emoji)? onEmojiSelected;
 
   @override
+  State<EmojiWidget> createState() => _EmojiWidgetState();
+}
+
+class _EmojiWidgetState extends State<EmojiWidget> {
+  bool _pickingSkinTone = false;
+
+  @override
   Widget build(BuildContext context) {
-    return Center(
-      child: InkWell(
-        child: Tooltip(
-          message: item.shortName.replaceAll('_', ' '),
-          child: Text(
-            item.char,
-            style: const TextStyle(fontSize: 30),
+    return PortalTarget(
+      visible: _pickingSkinTone,
+      portalFollower: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => setState(() => _pickingSkinTone = false),
+      ),
+      child: PortalTarget(
+        anchor: const Aligned(
+          follower: Alignment.centerLeft,
+          target: Alignment.centerRight,
+          backup: Aligned(
+            follower: Alignment.centerRight,
+            target: Alignment.centerLeft,
+            // offset: Offset(-50.0, 50),
+            backup: Aligned(
+              follower: Alignment.bottomRight,
+              target: Alignment.topLeft,
+            ),
           ),
         ),
-        onTap: () => onEmojiSelected?.call(item),
+        visible: _pickingSkinTone,
+        portalFollower: Builder(builder: (context) {
+          return Card(
+            elevation: 3,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (var emoji in widget.modifiablEmojis!)
+                  Text(
+                    emoji.char,
+                    style: const TextStyle(fontSize: 30),
+                  )
+              ],
+            ),
+          );
+        }),
+        child: Center(
+          child: InkWell(
+            onTap: () => widget.onEmojiSelected?.call(widget.item),
+            onDoubleTap: () {
+              if (widget.modifiablEmojis != null) {
+                setState(() => _pickingSkinTone = !_pickingSkinTone);
+              }
+            },
+            child: Tooltip(
+              message: widget.item.shortName.replaceAll('_', ' '),
+              child: Text(
+                widget.item.char,
+                style: const TextStyle(fontSize: 30),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
