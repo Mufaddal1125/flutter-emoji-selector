@@ -33,15 +33,6 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
-    return Material(
-      child: EmojiSelector(
-        onEmojiSelected: (emoji) {
-          // print(emoji.char); // prints the emoji
-          // print(emoji.name); // prints the emoji name
-          print(emoji.name); // prints the emoji short name
-        },
-      ),
-    );
     return Scaffold(
       appBar: AppBar(title: const Text('Emoji Selector')),
       body: Column(
@@ -61,9 +52,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       builder: ((context) {
                         return EmojiSelector(
                           onEmojiSelected: (emoji) {
-                            // print(emoji.char); // prints the emoji
-                            // print(emoji.name); // prints the emoji name
-                            print(emoji.name); // prints the emoji short name
+                            print(emoji.char); // prints the emoji
+                            print(emoji.name); // prints the emoji name
                           },
                         );
                       }),
