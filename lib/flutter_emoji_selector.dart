@@ -6,8 +6,11 @@ import 'package:flutter_portal/flutter_portal.dart';
 export 'package:emojis/emoji.dart'; // to use Emoji utilities
 
 class EmojiSelector extends StatefulWidget {
-  const EmojiSelector({super.key, this.onEmojiSelected});
+  const EmojiSelector(
+      {super.key, this.onEmojiSelected, this.showEmojiGroupName = false});
   final void Function(Emoji)? onEmojiSelected;
+  final bool showEmojiGroupName;
+
   @override
   State<EmojiSelector> createState() => _EmojiSelectorState();
 }
@@ -102,11 +105,13 @@ class _EmojiSelectorState extends State<EmojiSelector>
                                 .copyWith(primaryColor: Colors.black),
                             child: group.icon,
                           ),
-                          const SizedBox(width: 8),
-                          Text(
-                            group.value,
-                            style: Theme.of(context).textTheme.labelLarge,
-                          ),
+                          if (widget.showEmojiGroupName) ...[
+                            const SizedBox(width: 8),
+                            Text(
+                              group.value,
+                              style: Theme.of(context).textTheme.labelLarge,
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -233,12 +238,11 @@ class _EmojiWidgetState extends State<EmojiWidget> {
       ),
       child: PortalTarget(
         anchor: const Aligned(
-          follower: Alignment.centerLeft,
-          target: Alignment.centerRight,
+          follower: Alignment.bottomCenter,
+          target: Alignment.topCenter,
           backup: Aligned(
-            follower: Alignment.centerRight,
-            target: Alignment.centerLeft,
-            // offset: Offset(-50.0, 50),
+            follower: Alignment.bottomLeft,
+            target: Alignment.topRight,
             backup: Aligned(
               follower: Alignment.bottomRight,
               target: Alignment.topLeft,
@@ -253,9 +257,15 @@ class _EmojiWidgetState extends State<EmojiWidget> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 for (var emoji in widget.modifiablEmojis!)
-                  Text(
-                    emoji.char,
-                    style: const TextStyle(fontSize: 30),
+                  InkWell(
+                    onTap: () {
+                      widget.onEmojiSelected?.call(emoji);
+                      setState(() => _pickingSkinTone = false);
+                    },
+                    child: Text(
+                      emoji.char,
+                      style: const TextStyle(fontSize: 30),
+                    ),
                   )
               ],
             ),
