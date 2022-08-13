@@ -2,7 +2,7 @@
 ### Added
 - Create EmojiSelector Widget
 
-## Unreleased
+## 0.2.1 - 2022-08-13
 ### Fixed
 - skintone popup alignment
 
