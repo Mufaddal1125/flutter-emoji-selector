@@ -1,4 +1,3 @@
-
 import 'package:emojis/emoji.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
@@ -37,7 +36,9 @@ class _EmojiWidgetState extends State<EmojiWidget> {
           backup: Aligned(
             follower: Alignment.bottomLeft,
             target: Alignment.topRight,
+            offset: Offset(-45.0, 0.0),
             backup: Aligned(
+              offset: Offset(45.0, 0.0),
               follower: Alignment.bottomRight,
               target: Alignment.topLeft,
             ),
