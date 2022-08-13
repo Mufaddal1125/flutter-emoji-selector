@@ -7,7 +7,11 @@ import 'package:flutter_portal/flutter_portal.dart';
 class EmojiSelector extends StatefulWidget {
   const EmojiSelector(
       {super.key, this.onEmojiSelected, this.showEmojiGroupName = false});
+
+  /// Callback for emoji selection
   final void Function(Emoji)? onEmojiSelected;
+
+  /// Whether to show group name
   final bool showEmojiGroupName;
 
   @override
@@ -16,10 +20,16 @@ class EmojiSelector extends StatefulWidget {
 
 class _EmojiSelectorState extends State<EmojiSelector>
     with TickerProviderStateMixin {
+  /// emojis grouped by emoji group
   final Map<EmojiGroup, List<Emoji>> _emojiGroupMap = {};
+
+  /// all the emojis
   final List<Emoji> _emojis = Emoji.all();
+
+  /// emoji group tab controller
   late TabController tabController;
 
+  /// search controller
   final _searchController = TextEditingController();
 
   List<Emoji> searchResults = [];
@@ -64,17 +74,15 @@ class _EmojiSelectorState extends State<EmojiSelector>
                 filled: true,
               ),
               controller: _searchController,
-              onChanged: (val) {
-                setState(() {
-                  searchResults = _emojis.where((element) {
-                    var val2 = val.toLowerCase();
-                    return element.char.contains(val) ||
-                        element.name.toLowerCase().contains(val2) ||
-                        element.shortName.toLowerCase().contains(val2) ||
-                        element.emojiGroup.name.toLowerCase().contains(val2);
-                  }).toList();
-                });
-              },
+              onChanged: (val) => setState(() {
+                searchResults = _emojis.where((element) {
+                  var lowerVal = val.toLowerCase();
+                  return element.char.contains(lowerVal) ||
+                      element.name.toLowerCase().contains(lowerVal) ||
+                      element.shortName.toLowerCase().contains(lowerVal) ||
+                      element.emojiGroup.name.toLowerCase().contains(lowerVal);
+                }).toList();
+              }),
             ),
           ),
           if (_searchController.text.isNotEmpty)

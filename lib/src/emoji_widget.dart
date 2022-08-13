@@ -10,8 +10,11 @@ class EmojiWidget extends StatefulWidget {
     this.modifiablEmojis,
   }) : super(key: key);
 
+  /// different skins of emoji
   final List<Emoji>? modifiablEmojis;
+  /// emoji
   final Emoji item;
+  /// Callback for emoji selection
   final Function(Emoji emoji)? onEmojiSelected;
 
   @override
@@ -19,6 +22,7 @@ class EmojiWidget extends StatefulWidget {
 }
 
 class _EmojiWidgetState extends State<EmojiWidget> {
+  /// whether to show popup
   bool _pickingSkinTone = false;
 
   @override

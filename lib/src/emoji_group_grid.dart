@@ -1,4 +1,3 @@
-
 import 'package:emojis/emoji.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_emoji_selector/src/emoji_widget.dart';
@@ -9,7 +8,11 @@ class EmojiGroupGrid extends StatefulWidget {
     required List<Emoji> emojis,
     this.onEmojiSelected,
   }) : _emojis = emojis;
+
+  /// Callback for emoji selection
   final Function(Emoji)? onEmojiSelected;
+
+  /// list of emojis for the group
   final List<Emoji> _emojis;
 
   @override
@@ -17,9 +20,15 @@ class EmojiGroupGrid extends StatefulWidget {
 }
 
 class _EmojiGroupGridState extends State<EmojiGroupGrid> {
+  // emojis for grid
   final List<Emoji> _emojis = [];
+  // emojis with different skins
+  // key: normal emoji
+  // value: List of skin variants for emoji
   final Map<Emoji, List<Emoji>> _modifiableEmojiMap = {};
-  final Map<String, List<Emoji>> l = {};
+
+  /// same as [_modifiableEmojiMap] but the keys are emoji chars
+  final Map<String, List<Emoji>> _modifiableEmojiCharMap = {};
 
   @override
   void initState() {
@@ -38,8 +47,8 @@ class _EmojiGroupGridState extends State<EmojiGroupGrid> {
         } else {
           var split = emoji.name.split(':');
           var emojiName = split.first;
-          l[emojiName] ??= [];
-          l[emojiName]!.add(emoji);
+          _modifiableEmojiCharMap[emojiName] ??= [];
+          _modifiableEmojiCharMap[emojiName]!.add(emoji);
         }
         continue;
       }
@@ -49,8 +58,8 @@ class _EmojiGroupGridState extends State<EmojiGroupGrid> {
       if (Emoji.modify(emoji.char, fitzpatrick.light) != emoji.char) {
         var split = emoji.name.split(':');
         var emojiName = split.first;
-        if (l.containsKey(emojiName)) {
-          _modifiableEmojiMap[emoji] = l[emojiName]!;
+        if (_modifiableEmojiCharMap.containsKey(emojiName)) {
+          _modifiableEmojiMap[emoji] = _modifiableEmojiCharMap[emojiName]!;
         }
       }
     }
