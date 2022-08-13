@@ -18,12 +18,16 @@ Emoji selector for Flutter
 - Available on all platforms
 - Categorized Emojis
 - Search Emojis
+- Double tap for skintone popup
 
-<p align="center"><img src="assets/emoji_selector.png" height="700"></p>
+<p align="center"><img src="https://github.com/Mufaddal1125/flutter-emoji-selector/blob/main/assets/emoji_selector.png?raw=true" height="700"></p>
 
 
 ## Search
-<p align="center"><img src="assets/search.png" height="700"></p>
+<p align="center"><img src="https://github.com/Mufaddal1125/flutter-emoji-selector/blob/main/assets/search.png?raw=true" height="700"></p>
+
+## Skin tone
+<p align="center"><img src="https://raw.githubusercontent.com/Mufaddal1125/flutter-emoji-selector/main/assets/skintone.png" height="700"></p>
 
 ## Getting started
 
