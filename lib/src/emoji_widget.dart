@@ -12,8 +12,10 @@ class EmojiWidget extends StatefulWidget {
 
   /// different skins of emoji
   final List<Emoji>? modifiablEmojis;
+
   /// emoji
   final Emoji item;
+
   /// Callback for emoji selection
   final Function(Emoji emoji)? onEmojiSelected;
 
@@ -49,24 +51,31 @@ class _EmojiWidgetState extends State<EmojiWidget> {
           ),
         ),
         visible: _pickingSkinTone,
-        portalFollower: Builder(builder: (context) {
-          return Card(
-            elevation: 3,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                for (var emoji in widget.modifiablEmojis!)
-                  InkWell(
-                    onTap: () {
-                      widget.onEmojiSelected?.call(emoji);
-                      setState(() => _pickingSkinTone = false);
-                    },
-                    child: Text(
-                      emoji.char,
-                      style: const TextStyle(fontSize: 30),
-                    ),
-                  )
-              ],
+        portalFollower: LayoutBuilder(builder: (context, constraints) {
+          return SizedBox(
+            width: MediaQuery.of(context).size.width * 0.7,
+            child: Card(
+              elevation: 3,
+              child: Wrap(
+                runAlignment: WrapAlignment.center,
+                alignment: WrapAlignment.center,
+                children: [
+                  for (var emoji in widget.modifiablEmojis!)
+                    Padding(
+                      padding: const EdgeInsets.all(2.0),
+                      child: InkWell(
+                        onTap: () {
+                          widget.onEmojiSelected?.call(emoji);
+                          setState(() => _pickingSkinTone = false);
+                        },
+                        child: Text(
+                          emoji.char,
+                          style: const TextStyle(fontSize: 30),
+                        ),
+                      ),
+                    )
+                ],
+              ),
             ),
           );
         }),

@@ -2,6 +2,11 @@
 ### Added
 - Create EmojiSelector Widget
 
+## 0.2.2 - 2022-08-14
+### Fixed
+- duplicate emojis
+- skin tone popup goes off screen
+
 ## 0.2.1 - 2022-08-13
 ### Fixed
 - skintone popup alignment

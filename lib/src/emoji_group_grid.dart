@@ -44,17 +44,18 @@ class _EmojiGroupGridState extends State<EmojiGroupGrid> {
         if (noSkin != null) {
           _modifiableEmojiMap[noSkin] ??= [];
           _modifiableEmojiMap[noSkin]!.add(emoji);
+          continue;
         } else {
           var split = emoji.name.split(':');
           var emojiName = split.first;
           _modifiableEmojiCharMap[emojiName] ??= [];
           _modifiableEmojiCharMap[emojiName]!.add(emoji);
+          continue;
         }
-        continue;
       }
       _emojis.add(emoji);
     }
-    for (var emoji in widget._emojis) {
+    for (var emoji in _emojis) {
       if (Emoji.modify(emoji.char, fitzpatrick.light) != emoji.char) {
         var split = emoji.name.split(':');
         var emojiName = split.first;
@@ -63,7 +64,9 @@ class _EmojiGroupGridState extends State<EmojiGroupGrid> {
         }
       }
     }
-    _emojis.addAll(_modifiableEmojiMap.keys);
+    for (var element in _modifiableEmojiMap.keys) {
+      if (!_emojis.contains(element)) _emojis.add(element);
+    }
   }
 
   @override

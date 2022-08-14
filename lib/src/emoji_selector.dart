@@ -5,14 +5,21 @@ import 'package:flutter_emoji_selector/src/extensions.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 
 class EmojiSelector extends StatefulWidget {
-  const EmojiSelector(
-      {super.key, this.onEmojiSelected, this.showEmojiGroupName = false});
+  const EmojiSelector({
+    super.key,
+    this.onEmojiSelected,
+    this.showEmojiGroupName = false,
+    this.autofocusSearchField = false,
+  });
 
   /// Callback for emoji selection
   final void Function(Emoji)? onEmojiSelected;
 
   /// Whether to show group name
   final bool showEmojiGroupName;
+
+  /// Whether to auto focus on search
+  final bool autofocusSearchField;
 
   @override
   State<EmojiSelector> createState() => _EmojiSelectorState();
@@ -61,7 +68,7 @@ class _EmojiSelectorState extends State<EmojiSelector>
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextFormField(
-              autofocus: true,
+              autofocus: widget.autofocusSearchField,
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),

@@ -15,6 +15,7 @@ Emoji selector for Flutter
 
 ## Features
 
+- Unicode 13.1 emojis
 - Available on all platforms
 - Categorized Emojis
 - Search Emojis
