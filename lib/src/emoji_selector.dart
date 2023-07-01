@@ -9,6 +9,7 @@ class EmojiSelector extends StatefulWidget {
     super.key,
     this.onEmojiSelected,
     this.showEmojiGroupName = false,
+    this.showSearchField = true,
     this.autofocusSearchField = false,
   });
 
@@ -17,6 +18,9 @@ class EmojiSelector extends StatefulWidget {
 
   /// Whether to show group name
   final bool showEmojiGroupName;
+
+  /// Whether to show search field
+  final bool showSearchField;
 
   /// Whether to auto focus on search
   final bool autofocusSearchField;
@@ -65,31 +69,34 @@ class _EmojiSelectorState extends State<EmojiSelector>
     return Portal(
       child: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextFormField(
-              autofocus: widget.autofocusSearchField,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide.none,
+          Visibility(
+            visible: widget.showSearchField,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextFormField(
+                autofocus: widget.autofocusSearchField,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                  floatingLabelBehavior: FloatingLabelBehavior.never,
+                  labelText: 'Search Emoji',
+                  hintText: 'Search Emoji',
+                  fillColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                  filled: true,
                 ),
-                floatingLabelBehavior: FloatingLabelBehavior.never,
-                labelText: 'Search Emoji',
-                hintText: 'Search Emoji',
-                fillColor: Theme.of(context).primaryColor.withOpacity(0.1),
-                filled: true,
+                controller: _searchController,
+                onChanged: (val) => setState(() {
+                  searchResults = _emojis.where((element) {
+                    var lowerVal = val.toLowerCase();
+                    return element.char.contains(lowerVal) ||
+                        element.name.toLowerCase().contains(lowerVal) ||
+                        element.shortName.toLowerCase().contains(lowerVal) ||
+                        element.emojiGroup.name.toLowerCase().contains(lowerVal);
+                  }).toList();
+                }),
               ),
-              controller: _searchController,
-              onChanged: (val) => setState(() {
-                searchResults = _emojis.where((element) {
-                  var lowerVal = val.toLowerCase();
-                  return element.char.contains(lowerVal) ||
-                      element.name.toLowerCase().contains(lowerVal) ||
-                      element.shortName.toLowerCase().contains(lowerVal) ||
-                      element.emojiGroup.name.toLowerCase().contains(lowerVal);
-                }).toList();
-              }),
             ),
           ),
           if (_searchController.text.isNotEmpty)
