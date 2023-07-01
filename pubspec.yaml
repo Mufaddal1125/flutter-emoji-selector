@@ -1,10 +1,10 @@
 name: flutter_emoji_selector
 description: Emoji selector for Flutter
-version: 0.2.2
+version: 0.3.0
 homepage: https://github.com/Mufaddal1125/flutter-emoji-selector
 
 environment:
-  sdk: ">=2.17.6 <3.0.0"
+  sdk: ">=2.17.6 <4.0.0"
   flutter: ">=1.17.0"
 
 dependencies:

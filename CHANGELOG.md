@@ -2,6 +2,17 @@
 ### Added
 - Create EmojiSelector Widget
 
+## 0.3.0 - 2023-07-01
+### Added
+- show search field parameter
+- search field decoration parameter
+
+### Changed
+- use popup menu to show skintone emojis
+
+### Fixed
+- search results not updated
+
 ## 0.2.2 - 2022-08-14
 ### Fixed
 - duplicate emojis
