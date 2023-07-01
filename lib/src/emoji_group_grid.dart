@@ -1,6 +1,8 @@
 import 'package:emojis/emoji.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_emoji_selector/src/emoji_widget.dart';
+import 'package:flutter_emoji_selector/src/extensions.dart';
 
 class EmojiGroupGrid extends StatefulWidget {
   const EmojiGroupGrid({
@@ -21,66 +23,92 @@ class EmojiGroupGrid extends StatefulWidget {
 
 class _EmojiGroupGridState extends State<EmojiGroupGrid> {
   // emojis for grid
-  final List<Emoji> _emojis = [];
+  List<Emoji> _emojis = [];
   // emojis with different skins
   // key: normal emoji
   // value: List of skin variants for emoji
-  final Map<Emoji, List<Emoji>> _modifiableEmojiMap = {};
+  Map<String, List<Emoji>> _modifiableEmojiMap = {};
 
-  /// same as [_modifiableEmojiMap] but the keys are emoji chars
-  final Map<String, List<Emoji>> _modifiableEmojiCharMap = {};
+  late Future<void> emojiFuture;
 
   @override
   void initState() {
-    populateEmojis();
+    emojiFuture = compute<List<Map<String, dynamic>>, Map<String, dynamic>>(
+            (message) => populateEmojis(
+                message.map((e) => EmojiExtension.fromJson(e)).toList()),
+            widget._emojis.map((e) => e.toJson()).toList())
+        .then((value) {
+      _emojis = value['_emojis'];
+      _modifiableEmojiMap = value['_modifiableEmojiMap'];
+    });
     super.initState();
-  }
-
-  void populateEmojis() {
-    for (var emoji in widget._emojis) {
-      if (emoji.modifiable) {
-        var stabilize = Emoji.stabilize(emoji.char, gender: false);
-        var noSkin = Emoji.byChar(stabilize);
-        if (noSkin != null) {
-          _modifiableEmojiMap[noSkin] ??= [];
-          _modifiableEmojiMap[noSkin]!.add(emoji);
-          continue;
-        } else {
-          var split = emoji.name.split(':');
-          var emojiName = split.first;
-          _modifiableEmojiCharMap[emojiName] ??= [];
-          _modifiableEmojiCharMap[emojiName]!.add(emoji);
-          continue;
-        }
-      }
-      _emojis.add(emoji);
-    }
-    for (var emoji in _emojis) {
-      if (Emoji.modify(emoji.char, fitzpatrick.light) != emoji.char) {
-        var split = emoji.name.split(':');
-        var emojiName = split.first;
-        if (_modifiableEmojiCharMap.containsKey(emojiName)) {
-          _modifiableEmojiMap[emoji] = _modifiableEmojiCharMap[emojiName]!;
-        }
-      }
-    }
-    for (var element in _modifiableEmojiMap.keys) {
-      if (!_emojis.contains(element)) _emojis.add(element);
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return GridView.extent(
-      maxCrossAxisExtent: 50,
-      children: [
-        for (var item in _emojis)
-          EmojiWidget(
-            item: item,
-            onEmojiSelected: widget.onEmojiSelected,
-            modifiablEmojis: _modifiableEmojiMap[item],
-          ),
-      ],
+    return FutureBuilder(
+      future: emojiFuture,
+      builder: (context, data) {
+        if (data.connectionState != ConnectionState.done) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        return GridView.extent(
+          maxCrossAxisExtent: 50,
+          children: [
+            for (var item in _emojis)
+              Builder(builder: (context) {
+                var modifiables = _modifiableEmojiMap[item.char];
+                return EmojiWidget(
+                  item: item,
+                  onEmojiSelected: widget.onEmojiSelected,
+                  modifiablEmojis: modifiables,
+                );
+              }),
+          ],
+        );
+      },
     );
   }
+}
+
+Map<String, dynamic> populateEmojis(List<Emoji> emojis) {
+  List<Emoji> evaluatedEmojis = [];
+  final Map<String, List<Emoji>> modifiableEmojiMap = {};
+  final Map<String, List<Emoji>> modifiableEmojiCharMap = {};
+  for (var emoji in emojis) {
+    if (emoji.modifiable) {
+      var stabilize = Emoji.stabilize(emoji.char, gender: false);
+      var noSkin = Emoji.byChar(stabilize);
+      if (noSkin != null) {
+        modifiableEmojiMap[noSkin.char] ??= [];
+        modifiableEmojiMap[noSkin.char]!.add(emoji);
+        continue;
+      } else {
+        var split = emoji.name.split(':');
+        var emojiName = split.first;
+        modifiableEmojiCharMap[emojiName] ??= [];
+        modifiableEmojiCharMap[emojiName]!.add(emoji);
+        continue;
+      }
+    }
+    evaluatedEmojis.add(emoji);
+  }
+  for (var emoji in evaluatedEmojis) {
+    if (Emoji.modify(emoji.char, fitzpatrick.light) != emoji.char) {
+      var split = emoji.name.split(':');
+      var emojiName = split.first;
+      if (modifiableEmojiCharMap.containsKey(emojiName)) {
+        modifiableEmojiMap[emoji.char] = modifiableEmojiCharMap[emojiName]!;
+      }
+    }
+  }
+  for (var element in modifiableEmojiMap.keys) {
+    var emoji = Emoji.byChar(element);
+    if (!evaluatedEmojis.contains(emoji)) evaluatedEmojis.add(emoji!);
+  }
+  return {
+    '_emojis': evaluatedEmojis,
+    '_modifiableEmojiMap': modifiableEmojiMap,
+  };
 }

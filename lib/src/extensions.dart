@@ -1,4 +1,3 @@
-
 import 'package:emojis/emoji.dart';
 import 'package:flutter/material.dart';
 
@@ -47,5 +46,28 @@ extension StringExtensions on String {
   String get capitalizeWordsInitial => replaceAllMapped(
         RegExp(r'(\w)(\w+)'),
         (match) => '${match.group(1)!.toUpperCase()}${match.group(2)}',
+      );
+}
+
+extension EmojiExtension on Emoji {
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'char': char,
+        'keywords': keywords,
+        'emojiGroup': emojiGroup.index,
+        'modifiable': modifiable,
+        'shortName': shortName,
+        'emojiSubgroup': emojiSubgroup.index,
+        
+      };
+
+  static Emoji fromJson(Map<String, dynamic> json) => Emoji(
+        name: json['name'] as String,
+        char: json['char'] as String,
+        keywords: json['keywords'] as List<String>,
+        emojiGroup: EmojiGroup.values[json['emojiGroup'] as int],
+        modifiable: json['modifiable'] as bool,
+        shortName: json['shortName'] as String,
+        emojiSubgroup: EmojiSubgroup.values[json['emojiSubgroup'] as int],
       );
 }
