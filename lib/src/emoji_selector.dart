@@ -1,3 +1,4 @@
+import 'package:easy_debounce/easy_debounce.dart';
 import 'package:emojis/emoji.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_emoji_selector/src/emoji_group_grid.dart';
@@ -11,7 +12,12 @@ class EmojiSelector extends StatefulWidget {
     this.showEmojiGroupName = false,
     this.showSearchField = true,
     this.autofocusSearchField = false,
+    this.searchDelay = const Duration(milliseconds: 200),
+    this.searchFieldDecoration,
   });
+
+  /// Delay for search
+  final Duration searchDelay;
 
   /// Callback for emoji selection
   final void Function(Emoji)? onEmojiSelected;
@@ -24,6 +30,9 @@ class EmojiSelector extends StatefulWidget {
 
   /// Whether to auto focus on search
   final bool autofocusSearchField;
+
+  /// search field decoration
+  final InputDecoration? searchFieldDecoration;
 
   @override
   State<EmojiSelector> createState() => _EmojiSelectorState();
@@ -75,33 +84,45 @@ class _EmojiSelectorState extends State<EmojiSelector>
               padding: const EdgeInsets.all(8.0),
               child: TextFormField(
                 autofocus: widget.autofocusSearchField,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide.none,
-                  ),
-                  floatingLabelBehavior: FloatingLabelBehavior.never,
-                  labelText: 'Search Emoji',
-                  hintText: 'Search Emoji',
-                  fillColor: Theme.of(context).primaryColor.withOpacity(0.1),
-                  filled: true,
-                ),
+                decoration: widget.searchFieldDecoration ??
+                    InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide.none,
+                      ),
+                      floatingLabelBehavior: FloatingLabelBehavior.never,
+                      labelText: 'Search Emoji',
+                      hintText: 'Search Emoji',
+                      fillColor:
+                          Theme.of(context).primaryColor.withOpacity(0.1),
+                      filled: true,
+                    ),
                 controller: _searchController,
-                onChanged: (val) => setState(() {
-                  searchResults = _emojis.where((element) {
-                    var lowerVal = val.toLowerCase();
-                    return element.char.contains(lowerVal) ||
-                        element.name.toLowerCase().contains(lowerVal) ||
-                        element.shortName.toLowerCase().contains(lowerVal) ||
-                        element.emojiGroup.name.toLowerCase().contains(lowerVal);
-                  }).toList();
-                }),
+                onChanged: (val) {
+                  EasyDebounce.debounce('search', widget.searchDelay, () {
+                    setState(() {
+                      var lowerVal = val.toLowerCase();
+                      searchResults = _emojis
+                          .where((element) =>
+                              element.char.contains(lowerVal) ||
+                              element.name.toLowerCase().contains(lowerVal) ||
+                              element.shortName
+                                  .toLowerCase()
+                                  .contains(lowerVal) ||
+                              element.emojiGroup.name
+                                  .toLowerCase()
+                                  .contains(lowerVal))
+                          .toList();
+                    });
+                  });
+                },
               ),
             ),
           ),
           if (_searchController.text.isNotEmpty)
             Expanded(
               child: EmojiGroupGrid(
+                key: ValueKey(_searchController.text),
                 emojis: searchResults,
                 onEmojiSelected: widget.onEmojiSelected,
               ),

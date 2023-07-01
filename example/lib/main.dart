@@ -55,7 +55,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             print(emoji.char); // prints the emoji
                             print(emoji.name); // prints the emoji name
                           },
-                          showSearchField: false,
+                          showSearchField: true,
                         );
                       }),
                     );
