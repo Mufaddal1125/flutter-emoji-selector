@@ -3,7 +3,6 @@ import 'package:emojis/emoji.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_emoji_selector/src/emoji_group_grid.dart';
 import 'package:flutter_emoji_selector/src/extensions.dart';
-import 'package:flutter_portal/flutter_portal.dart';
 
 class EmojiSelector extends StatefulWidget {
   const EmojiSelector({
@@ -75,8 +74,7 @@ class _EmojiSelectorState extends State<EmojiSelector>
 
   @override
   Widget build(BuildContext context) {
-    return Portal(
-      child: Column(
+    return Column(
         children: [
           Visibility(
             visible: widget.showSearchField,
@@ -176,7 +174,6 @@ class _EmojiSelectorState extends State<EmojiSelector>
             ),
           ]
         ],
-      ),
-    );
+      );
   }
 }
