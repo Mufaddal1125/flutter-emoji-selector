@@ -2,6 +2,10 @@
 ### Added
 - Create EmojiSelector Widget
 
+## 0.4.0 - 2023-07-02
+### Fixed
+- performance issues
+
 ## 0.3.0 - 2023-07-01
 ### Added
 - show search field parameter
