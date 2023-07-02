@@ -9,7 +9,10 @@ class EmojiGroupGrid extends StatefulWidget {
     super.key,
     required List<Emoji> emojis,
     this.onEmojiSelected,
+    this.emojiGroup,
   }) : _emojis = emojis;
+
+  final EmojiGroup? emojiGroup;
 
   /// Callback for emoji selection
   final Function(Emoji)? onEmojiSelected;
@@ -33,14 +36,7 @@ class _EmojiGroupGridState extends State<EmojiGroupGrid> {
 
   @override
   void initState() {
-    emojiFuture = compute<List<Map<String, dynamic>>, Map<String, dynamic>>(
-            (message) => populateEmojis(
-                message.map((e) => EmojiExtension.fromJson(e)).toList()),
-            widget._emojis.map((e) => e.toJson()).toList())
-        .then((value) {
-      _emojis = value['_emojis'];
-      _modifiableEmojiMap = value['_modifiableEmojiMap'];
-    });
+    emojiFuture = popuplateEmojis();
     super.initState();
   }
 
@@ -70,12 +66,42 @@ class _EmojiGroupGridState extends State<EmojiGroupGrid> {
       },
     );
   }
+
+  Future<void> popuplateEmojis() async {
+    var emojiGroup = widget.emojiGroup;
+    if (emojiGroup?.index != null) {
+      try {
+        var group = EmojiGroup.values[widget.emojiGroup!.index];
+        if (_ModifiableGroupCache.cache.containsKey(group.index)) {
+          var data = _ModifiableGroupCache.cache[emojiGroup!.index]!;
+          _emojis = data['_emojis'];
+          _modifiableEmojiMap = data['_modifiableEmojiMap'];
+          return;
+        }
+      } catch (e) {
+        debugPrint('error getting cache $e');
+      }
+    }
+    var data = await compute<List<Map<String, dynamic>>, Map<String, dynamic>>(
+        (message) => calculateModifiableEmojis(
+            message.map((e) => EmojiExtension.fromJson(e)).toList()),
+        widget._emojis.map((e) => e.toJson()).toList());
+    _emojis = data['_emojis'];
+    _modifiableEmojiMap = data['_modifiableEmojiMap'];
+    if (emojiGroup != null) {
+      _ModifiableGroupCache.cache[emojiGroup.index] = data;
+    }
+  }
 }
 
-Map<String, dynamic> populateEmojis(List<Emoji> emojis) {
+class _ModifiableGroupCache {
+  static Map<int, Map<String, dynamic>> cache = {};
+}
+
+Map<String, dynamic> calculateModifiableEmojis(List<Emoji> emojis) {
   List<Emoji> evaluatedEmojis = [];
   final Map<String, List<Emoji>> modifiableEmojiMap = {};
-  final Map<String, List<Emoji>> modifiableEmojiCharMap = {};
+  final Map<String, List<Emoji>> modifiableEmojiNameMap = {};
   for (var emoji in emojis) {
     if (emoji.modifiable) {
       var stabilize = Emoji.stabilize(emoji.char, gender: false);
@@ -87,8 +113,8 @@ Map<String, dynamic> populateEmojis(List<Emoji> emojis) {
       } else {
         var split = emoji.name.split(':');
         var emojiName = split.first;
-        modifiableEmojiCharMap[emojiName] ??= [];
-        modifiableEmojiCharMap[emojiName]!.add(emoji);
+        modifiableEmojiNameMap[emojiName] ??= [];
+        modifiableEmojiNameMap[emojiName]!.add(emoji);
         continue;
       }
     }
@@ -98,8 +124,8 @@ Map<String, dynamic> populateEmojis(List<Emoji> emojis) {
     if (Emoji.modify(emoji.char, fitzpatrick.light) != emoji.char) {
       var split = emoji.name.split(':');
       var emojiName = split.first;
-      if (modifiableEmojiCharMap.containsKey(emojiName)) {
-        modifiableEmojiMap[emoji.char] = modifiableEmojiCharMap[emojiName]!;
+      if (modifiableEmojiNameMap.containsKey(emojiName)) {
+        modifiableEmojiMap[emoji.char] = modifiableEmojiNameMap[emojiName]!;
       }
     }
   }
@@ -107,8 +133,9 @@ Map<String, dynamic> populateEmojis(List<Emoji> emojis) {
     var emoji = Emoji.byChar(element);
     if (!evaluatedEmojis.contains(emoji)) evaluatedEmojis.add(emoji!);
   }
-  return {
+  var data = {
     '_emojis': evaluatedEmojis,
     '_modifiableEmojiMap': modifiableEmojiMap,
   };
+  return data;
 }

@@ -167,6 +167,7 @@ class _EmojiSelectorState extends State<EmojiSelector>
                       EmojiGroupGrid(
                         emojis: _emojiGroupMap[group]!,
                         onEmojiSelected: widget.onEmojiSelected,
+                        emojiGroup: group,
                       ),
                   ],
                 );
