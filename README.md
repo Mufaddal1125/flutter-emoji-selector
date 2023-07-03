@@ -13,6 +13,12 @@ and the Flutter guide for
 
 Emoji selector for Flutter
 
+
+<p>
+The Emoji Selector package for Flutter is a comprehensive solution for incorporating Unicode 13.1 emojis into your Flutter applications. With its seamless compatibility across all platforms, this package ensures a consistent and delightful user experience. The emojis are thoughtfully categorized, allowing users to easily browse and select their desired expressions. Additionally, a powerful search functionality enables users to quickly find specific emojis. One of the standout features is the skintone popup, which can be accessed through a convenient double-tap gesture, providing users with even more customization options. Whether you're building a messaging app, social media platform, or any application where emojis play a significant role, this package offers a streamlined and user-friendly way to enhance your user interface and communication capabilities.
+</p>
+
+
 ## Features
 
 - Unicode 13.1 emojis
